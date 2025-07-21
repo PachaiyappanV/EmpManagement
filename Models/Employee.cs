@@ -1,4 +1,7 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EmpManagement.Models;
+
 public class Employee
 {
     public int EmployeeId { get; set; }
