@@ -1,0 +1,13 @@
+@model Attendance
+<h2>Mark Attendance</h2>
+<form asp-action="Mark" method="post">
+    <div class="form-group">
+        <label>Employee ID</label>
+        <input class="form-control" name="employeeId" required />
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="isPresent" />
+        <label class="form-check-label">Present</label>
+    </div>
+    <button type="submit" class="btn btn-success">Submit</button>
+</form>
