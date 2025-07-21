@@ -1,0 +1,119 @@
+@model AttendanceViewModel
+@{
+    ViewData["Title"] = "Attendance";
+}
+
+<form style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<h2 class="text-center mb-3">Manage Attendance</h2>
+<p class="text-center">Date: <strong>@DateTime.Today.ToString("yyyy-MM-dd")</strong></p>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <input id="searchEmpId" class="form-control" placeholder="Search by Emp ID" />
+    </div>
+    <div class="col-md-6">
+        <input id="searchEmail" class="form-control" placeholder="Search by Email" />
+    </div>
+</div>
+
+<table class="table table-bordered text-center">
+    <thead>
+        <tr>
+            <th>S No</th>
+            <th>Emp ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Mark Attendance</th>
+        </tr>
+    </thead>
+    <tbody id="employeeTable">
+       @for (int i = 0; i < Model.Employees.Count; i++)
+        {
+            var emp = Model.Employees[i];
+            var attendance = Model.TodayAttendance.FirstOrDefault(a => a.EmployeeId == emp.EmployeeId);
+            string statusText = "🕓 Pending";
+
+            if (attendance != null)
+                statusText = attendance.IsPresent ? "✅ Present" : "❌ Absent";
+
+            <tr data-empid="@emp.EmployeeId" data-email="@emp.Email.ToLower()">
+                <td>@(i + 1)</td>
+                <td>@emp.EmployeeId</td>
+                <td>@emp.Name</td>
+                <td>@emp.Email</td>
+                <td>@emp.Department</td>
+                <td class="status-text">@statusText</td>
+                <td>
+                    <button class="btn btn-success btn-sm mark-btn" data-status="present">Present</button>
+                    <button class="btn btn-danger btn-sm mark-btn" data-status="absent">Absent</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="msg" class="text-center text-success mt-3"></div>
+
+@section Scripts {
+<script>
+    const empIdInput = document.getElementById('searchEmpId');
+    const emailInput = document.getElementById('searchEmail');
+
+    function filterRows() {
+        const empId = empIdInput.value.trim().toLowerCase();
+        const email = emailInput.value.trim().toLowerCase();
+        const rows = document.querySelectorAll('#employeeTable tr');
+
+        rows.forEach(row => {
+            const rowEmpId = row.dataset.empid.toLowerCase();
+            const rowEmail = row.dataset.email;
+
+            const matchEmpId = rowEmpId.includes(empId);
+            const matchEmail = rowEmail.includes(email);
+
+            row.style.display = (matchEmpId && matchEmail) ? '' : 'none';
+        });
+    }
+
+    empIdInput.addEventListener('input', filterRows);
+    emailInput.addEventListener('input', filterRows);
+
+    document.querySelectorAll('.mark-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            console.log("Button clicked:");
+            const row = this.closest('tr');
+            const empId = row.dataset.empid;
+            const isPresent = this.dataset.status === "present";
+
+            fetch('/Attendance/Mark', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ employeeId: empId, isPresent: isPresent })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to mark attendance");
+                return res.text();
+            })
+            .then(msg => {
+                document.getElementById('msg').textContent = msg;
+
+                 // Update status text in the row
+               const statusCell = row.querySelector('.status-text');
+                statusCell.textContent = isPresent ? "✅ Present" : "❌ Absent";
+            })
+            .catch(err => {
+                document.getElementById('msg').textContent = "Error marking attendance.";
+                document.getElementById('msg').classList.replace("text-success", "text-danger");
+            });
+        });
+    });
+</script>
+}
