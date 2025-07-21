@@ -6,5 +6,5 @@ public class Attendance
     public DateTime Date { get; set; }
     public bool IsPresent { get; set; }
 
-    public Employee Employee { get; set; }
+    public Employee? Employee { get; set; }
 }
