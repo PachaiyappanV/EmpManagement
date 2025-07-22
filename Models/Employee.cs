@@ -15,6 +15,14 @@ public class Employee
 
     [Required]
     public string? Department { get; set; }
+    [Required]
+    public string? Country { get; set; }
+
+    [Required]
+    public string? State { get; set; }
+
+
+
 
     public ICollection<Attendance>? Attendances { get; set; }
 }
