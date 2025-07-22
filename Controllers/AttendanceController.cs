@@ -72,4 +72,38 @@ public class AttendanceController : Controller
         await _context.SaveChangesAsync();
         return Content("Attendance marked successfully.");
     }
+
+  [HttpGet]
+  public async Task<IActionResult> History(int id, int? month, int? year)
+    {
+        var employee = await _context.Employees
+            .Include(e => e.Attendances)
+            .FirstOrDefaultAsync(e => e.EmployeeId == id);
+
+        if (employee == null)
+            return NotFound();
+
+        var attendances = employee.Attendances?.AsQueryable();
+
+        if (month.HasValue && year.HasValue)
+        {
+            attendances = attendances
+                .Where(a => a.Date.Month == month && a.Date.Year == year)
+                .OrderByDescending(a => a.Date);
+        }
+        else
+        {
+            attendances = attendances?.OrderByDescending(a => a.Date);
+        }
+
+        ViewBag.SelectedMonth = month;
+        ViewBag.SelectedYear = year;
+        ViewBag.MonthList = Enumerable.Range(1, 12);
+        ViewBag.YearList = Enumerable.Range(DateTime.Now.Year, 6);
+
+        ViewBag.Employee = employee;
+        return View(attendances?.ToList());
+    }
+
+
 }
