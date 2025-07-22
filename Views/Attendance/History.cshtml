@@ -1,0 +1,103 @@
+@using System.Globalization
+@model List<EmpManagement.Models.Attendance>
+@{
+    ViewData["Title"] = "Attendance History";
+    var employee = ViewBag.Employee as EmpManagement.Models.Employee;
+}
+
+<div class="container mt-5">
+    <h2>Attendance History</h2>
+    <h5 class="text-muted">@employee?.Name (@employee?.Email)</h5>
+
+    <!-- Filter Form -->
+    <form method="get" asp-action="History" asp-controller="Attendance" class="row g-3 mt-4 mb-4">
+        <input type="hidden" name="id" value="@employee?.EmployeeId" />
+        
+        <div class="col-md-3">
+            <label class="form-label">Month</label>
+            <select class="form-select" name="month">
+                <option value="">All</option>
+                @foreach (var m in ViewBag.MonthList)
+                {
+                    if (m == ViewBag.SelectedMonth)
+                           {
+                        <option value="@m" selected>
+                         @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                        </option>
+                       }
+                      else
+                   {
+                    <option value="@m">
+                   @CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(m)
+                </option>
+                  }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Year</label>
+            <select class="form-select" name="year">
+                <option value="">All</option>
+                @foreach (var y in ViewBag.YearList)
+                {
+                   if (y == ViewBag.SelectedYear)
+    {
+        <option value="@y" selected>
+            @y
+        </option>
+    }
+    else
+    {
+        <option value="@y">
+            @y
+        </option>
+    }
+                }
+            </select>
+        </div>
+
+        <div class="col-md-2 align-self-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+
+    <!-- Attendance Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var a in Model)
+                {
+                    <tr>
+                        <td>@a.Date.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @if (a.IsPresent)
+                            {
+                                <span class="badge bg-success">Present</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Absent</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="2" class="text-center text-muted">No attendance records found for this period.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <a href="@Url.Action("Index", "Employee")" class="btn btn-secondary mt-3">Back to Employee List</a>
+</div>
