@@ -28,7 +28,7 @@
             <th>Email</th>
             <th>Department</th>
             <th>Status</th>
-            <th>Mark Attendance</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody id="employeeTable">
@@ -51,6 +51,11 @@
                 <td>
                     <button class="btn btn-success btn-sm mark-btn" data-status="present">Present</button>
                     <button class="btn btn-danger btn-sm mark-btn" data-status="absent">Absent</button>
+                    <a asp-action="History" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-info">History</a>
+
+
+                    
+
                 </td>
             </tr>
         }
