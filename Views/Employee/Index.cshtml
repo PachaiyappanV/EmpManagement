@@ -4,8 +4,19 @@
 }
 <h2>Employees</h2>
 <a class="btn btn-primary" href="/Employee/Create">Add Employee</a>
-<table class="table table-bordered mt-3">
-    <thead><tr><th>Name</th><th>Email</th><th>Department</th><th>Actions</th></tr></thead>
+
+<table class="table table-bordered mt-3 text-center">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Country</th>
+            <th>State</th>
+            <th>Date Joined</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
     <tbody>
     @foreach (var emp in Model)
     {
@@ -13,6 +24,9 @@
             <td>@emp.Name</td>
             <td>@emp.Email</td>
             <td>@emp.Department</td>
+            <td>@emp.Country</td>
+            <td>@emp.State</td>
+            <td>@emp.DateJoined.ToString("dd/MM/yyyy")</td>
             <td>
                 <a class="btn btn-sm btn-warning" href="/Employee/Edit/@emp.EmployeeId">Edit</a>
                 <a class="btn btn-sm btn-danger" href="/Employee/Delete/@emp.EmployeeId">Delete</a>
