@@ -20,9 +20,7 @@ public class Employee
 
     [Required]
     public string? State { get; set; }
-
-
-
-
+    [Required]
+    public DateOnly DateJoined { get; set; }
     public ICollection<Attendance>? Attendances { get; set; }
 }
