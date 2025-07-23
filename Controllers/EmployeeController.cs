@@ -13,44 +13,51 @@ public class EmployeeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var employees = await _context.Employees.ToListAsync();
-        return View(employees);
-    }
-
-    public IActionResult Create() => View();
-
-    [HttpPost]
-    public async Task<IActionResult> Create(Employee employee)
-    {
-        if (!ModelState.IsValid)
-            return View(employee);
-
         try
         {
-            _context.Employees.Add(employee);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var employees = await _context.Employees.ToListAsync();
+            return View(employees);
         }
-        catch (DbUpdateException ex)
+        catch (Exception)
         {
-            // Log the error (ideally use ILogger, fallback to console if not configured)
-            Console.WriteLine("❌ Database update failed: " + ex.Message);
-
-            // Optionally, add a model-level error for user feedback
-            ModelState.AddModelError(string.Empty, "Unable to save changes. Please try again later.");
-
-            // Return to view with model state intact
-            return View(employee);
+            TempData["error"] = "Something went wrong while loading data.";
+            return View(new List<Employee>());
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("❌ Unexpected error: " + ex.Message);
-            ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
-            return View(employee);
-        }
+        
     }
 
+    public IActionResult Create()
+    {
+        return View();
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Create([Bind("Name,Email,Department,Country,State")]Employee employee)
+    {
+        if (!ModelState.IsValid){
+            return View(employee);
+        }
 
+        try
+            {
+                employee.DateJoined = DateOnly.FromDateTime(DateTime.Now);
+                _context.Employees.Add(employee);
+                await _context.SaveChangesAsync();
+                TempData["success"] = "Employee created successfully!";
+                return RedirectToAction("Index");
+            }
+        catch (DbUpdateException)
+            {
+
+                TempData["error"] = "Unable to save changes. Please try again later.";
+                return View(employee);
+            }
+        catch (Exception)
+            {
+                TempData["error"] = "An unexpected error occurred while creating the employee.";
+                return View(employee);
+            }
+    }
 
     public async Task<IActionResult> Edit(int id)
     {
@@ -63,36 +70,65 @@ public class EmployeeController : Controller
             }
             return View(employee);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            // Log the error (ideally use ILogger, fallback to console if not configured)
-            Console.WriteLine("❌ Error retrieving employee data: " + ex.Message);
-
-            // Optionally, add a model-level error for user feedback
-            ModelState.AddModelError(string.Empty, "An error occurred while retrieving employee data.");
-
-            // Redirect to error view or previous view
-            return RedirectToAction(nameof(Index));
+            TempData["error"] = "An unexpected error occurred while retrieving employee data.";
+            return RedirectToAction("Index");
         }
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(Employee employee)
     {
-        if (!ModelState.IsValid) return View(employee);
-        _context.Update(employee);
-        await _context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index));
+        if (!ModelState.IsValid)
+        {
+            return View(employee);
+        }
+
+        try
+        {
+            _context.Update(employee);
+            await _context.SaveChangesAsync();
+            TempData["success"] = "Employee updated successfully!";
+        }
+        catch (DbUpdateException)
+        {
+            TempData["error"] = "Unable to save changes. Please try again later.";
+            return View(employee);
+        }
+        catch (Exception)
+        {
+            TempData["error"] = "An unexpected error occurred while updating the employee.";
+            return View(employee);
+        }
+
+        return RedirectToAction("Index");
     }
 
     public async Task<IActionResult> Delete(int id)
     {
+
         var employee = await _context.Employees.FindAsync(id);
-        if (employee != null)
+
+        if (employee == null)
+        {
+            return NotFound();
+        }
+
+        try
         {
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
+            TempData["success"] = "Employee deleted successfully!";
         }
-        return RedirectToAction(nameof(Index));
+        catch (Exception)
+        {
+            TempData["error"] = "An unexpected error occurred while deleting the employee.";
+            return RedirectToAction("Index");
+        }
+
+        return RedirectToAction("Index");
     }
+
+  
 }
