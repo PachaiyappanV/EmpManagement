@@ -49,13 +49,13 @@
                 <td>@emp.Department</td>
                 <td class="status-text">@statusText</td>
                 <td>
-                    <button class="btn btn-success btn-sm mark-btn" data-status="present">Present</button>
-                    <button class="btn btn-danger btn-sm mark-btn" data-status="absent">Absent</button>
-                    <a asp-action="History" asp-route-id="@emp.EmployeeId" class="btn btn-sm btn-info">History</a>
+                   <button class="@($"btn btn-success{(attendance != null && attendance.IsPresent ? " disabled" : "")} btn-sm mark-btn")" data-status="present">
+                    Present
+                  </button>
 
+                    <button class="@($"btn btn-success{(attendance != null && !attendance.IsPresent ? " disabled" : "")} btn-sm mark-btn")" data-status="absent">Absent</button>
 
-                    
-
+                    <a asp-action="History" asp-route-id="@emp.EmployeeId"         class="btn btn-sm btn-info">History </a>
                 </td>
             </tr>
         }
@@ -65,6 +65,9 @@
 <div id="msg" class="text-center text-success mt-3"></div>
 
 @section Scripts {
+
+ <script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>   
 <script>
     const empIdInput = document.getElementById('searchEmpId');
     const emailInput = document.getElementById('searchEmail');
@@ -108,15 +111,13 @@
                 return res.text();
             })
             .then(msg => {
-                document.getElementById('msg').textContent = msg;
-
+                toastr.success(msg);
                  // Update status text in the row
                const statusCell = row.querySelector('.status-text');
                 statusCell.textContent = isPresent ? "✅ Present" : "❌ Absent";
             })
             .catch(err => {
-                document.getElementById('msg').textContent = "Error marking attendance.";
-                document.getElementById('msg').classList.replace("text-success", "text-danger");
+                toastr.error(err.message);
             });
         });
     });
