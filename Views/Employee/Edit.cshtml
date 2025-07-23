@@ -1,0 +1,85 @@
+@model EmpManagement.Models.Employee
+<h2>Update Employee</h2>
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="mb-3">
+        <label>Name</label>
+        <input class="form-control" asp-for="Name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>Email</label>
+        <input class="form-control" asp-for="Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label>Department</label>
+        <input class="form-control" asp-for="Department" />
+        <span asp-validation-for="Department" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+    <label for="Country" class="form-label">Country</label>
+    <select asp-for="Country" id="countryDropdown"  class="form-select" required>
+        <option value=@Model.Country>@Model.Country</option>
+    </select>
+</div>
+
+<div class="mb-3">
+    <label for="State" class="form-label">State</label>
+   <select id="stateDropdown" asp-for="State" class="form-select" required>
+        <option value=@Model.State>@Model.State</option>
+    </select>
+     
+</div>
+
+
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+
+<script>
+    const countryDropdown = document.getElementById("countryDropdown");
+    const stateDropdown = document.getElementById("stateDropdown");
+
+    // Load countries on page load
+    fetch("https://countriesnow.space/api/v0.1/countries/positions")
+        .then(response => response.json())
+        .then(data => {
+            data.data.forEach(country => {
+                const option = document.createElement("option");
+                option.value = country.name;
+                option.textContent = country.name;
+                countryDropdown.appendChild(option);
+            });
+        });
+
+    // Load states when country changes
+    countryDropdown.addEventListener("change", function () {
+        const selectedCountry = this.value;
+        stateDropdown.innerHTML = '<option value="">Loading...</option>';
+
+        fetch("https://countriesnow.space/api/v0.1/countries/states", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ country: selectedCountry })
+        })
+        .then(res => res.json())
+        .then(data => {
+            stateDropdown.innerHTML = '<option value="">Select State</option>';
+            data.data.states.forEach(state => {
+                const option = document.createElement("option");
+                option.value = state.name;
+                option.textContent = state.name;
+                stateDropdown.appendChild(option);
+            });
+        })
+        .catch(err => {
+            console.error("Error fetching states:", err);
+            stateDropdown.innerHTML = '<option value="">No states found</option>';
+        });
+    });
+</script>
+
+
+
